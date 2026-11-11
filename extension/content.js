@@ -127,12 +127,32 @@
   let ready = false;
   let lastReason = "";
   let lastTaskId = null;
+  let serverUp = null; // null = not checked yet
+
+  // Server health: every 30 s while it's up, every 10 s while it's down (to notice it coming back quickly),
+  // right after the server address changes in the popup, and right before each Presegment.
+  const OFFLINE_MSG = "Server offline. Start it, then try again.";
+  async function checkServer() {
+    const s = await settings();
+    try { await bg({ type: "LSP_HEALTH", serverUrl: s.serverUrl }); serverUp = true; }
+    catch { serverUp = false; }
+    return serverUp;
+  }
+  let healthTimer;
+  async function healthLoop() {
+    clearTimeout(healthTimer);
+    if (!busy && document.visibilityState === "visible") { await checkServer(); refreshReady(); }
+    healthTimer = setTimeout(healthLoop, serverUp === false ? 10000 : 30000);
+  }
+  chrome.storage.onChanged.addListener((ch) => { if (ch.serverUrl) healthLoop(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") healthLoop(); });
 
   // Keep the button disabled until the editor's audio is loaded and decoded.
   async function refreshReady() {
     if (!host.isConnected || busy) return;
     const s = await settings();
-    const r = await page("ready", { toName: s.toName }).catch(() => ({ ready: false, reason: "Open a task to presegment." }));
+    let r = await page("ready", { toName: s.toName }).catch(() => ({ ready: false, reason: "Open a task to presegment." }));
+    if (serverUp === false) r = { ...r, ready: false, reason: OFFLINE_MSG }; // the most actionable reason first
     ready = !!r.ready;
     $("run").disabled = !ready;
     $("run").title = ready ? "Diarize this task and add draft speaker segments (does not submit)" : r.reason;
@@ -154,6 +174,7 @@
         return;
       }
       confirmArmed = 0;
+      if (!(await checkServer())) throw new Error(OFFLINE_MSG);
       status("Reading audio from the editor…");
       const sendSr = s.removeMusic ? 44100 : TARGET_SR; // Demucs works at 44.1 kHz
       const pcm = await page("pcm", { toName: s.toName, sr: sendSr }).catch(() => null);
@@ -233,4 +254,5 @@
   $("run").disabled = true;
   refreshReady();
   setInterval(refreshReady, 1000);
+  healthLoop();
 })();

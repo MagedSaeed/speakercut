@@ -43,7 +43,7 @@
   <main>
     <div class="col">
     <section>
-      <label class="field">
+      <label class="field" for="serverUrl">
         <span class="name">Server<button type="button" class="tip" aria-label="About Server" data-tip="Address of the SpeakerCut diarization server. Keep http://127.0.0.1:8000 if the server runs on this computer or reaches it through an SSH tunnel.">i</button></span>
         <input type="url" id="serverUrl" spellcheck="false" autocomplete="off">
       </label>
@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <label class="switch lockable">
+      <label class="switch lockable" for="removeMusic">
         <span><b>Remove music first<button type="button" class="tip" aria-label="About Remove music first" data-tip="Strips background music (Demucs) before finding speakers. Cut points still line up with the original audio. Helps with loud music in series; it is slower, so leave it off for clean speech.">i</button></b><small>Separates vocals before diarizing</small></span>
         <input type="checkbox" id="removeMusic"><i></i>
       </label>
@@ -66,9 +66,9 @@
     <details class="lockable">
       <summary>Label Studio config names</summary>
       <div class="grid three">
-        <label class="num"><span>Labels<button type="button" class="tip" aria-label="About Labels" data-tip="The name of the Labels tag in your Label Studio labeling config that segments are added to. Only change it if your project uses a different name.">i</button></span><input type="text" id="fromName" spellcheck="false"></label>
-        <label class="num"><span>Audio<button type="button" class="tip" aria-label="About Audio" data-tip="The name of the Audio tag in your Label Studio labeling config that segments belong to.">i</button></span><input type="text" id="toName" spellcheck="false"></label>
-        <label class="num"><span>Label value<button type="button" class="tip" aria-label="About Label value" data-tip="The label every added segment gets, exactly as it appears in the labeling config.">i</button></span><input type="text" id="label" spellcheck="false"></label>
+        <label class="num" for="fromName"><span>Labels<button type="button" class="tip" aria-label="About Labels" data-tip="The name of the Labels tag in your Label Studio labeling config that segments are added to. Only change it if your project uses a different name.">i</button></span><input type="text" id="fromName" spellcheck="false"></label>
+        <label class="num" for="toName"><span>Audio<button type="button" class="tip" aria-label="About Audio" data-tip="The name of the Audio tag in your Label Studio labeling config that segments belong to.">i</button></span><input type="text" id="toName" spellcheck="false"></label>
+        <label class="num" for="label"><span>Label value<button type="button" class="tip" aria-label="About Label value" data-tip="The label every added segment gets, exactly as it appears in the labeling config.">i</button></span><input type="text" id="label" spellcheck="false"></label>
       </div>
     </details>
     </div>
@@ -77,12 +77,12 @@
     <section>
       <h2>Segments</h2>
       <div class="grid">
-        <label class="num"><span>Max length<button type="button" class="tip" aria-label="About Max length" data-tip="Consecutive turns of the same speaker are joined only while the segment stays this long or shorter. One long turn is never split. Empty means no limit: one segment per speaker turn.">i</button></span><span class="unit"><input type="number" min="0" step="1" id="maxDur" placeholder="none"><em>s</em></span></label>
-        <label class="num"><span>Merge gaps up to<button type="button" class="tip" aria-label="About Merge gaps up to" data-tip="Joins two turns of the same speaker when the pause between them is this short or shorter and nobody else speaks in between.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="maxGap"><em>s</em></span></label>
-        <label class="num"><span>Edge padding<button type="button" class="tip" aria-label="About Edge padding" data-tip="Extra time added before and after each segment so first and last words aren&#x27;t clipped. It never reaches into another speaker&#x27;s speech.">i</button></span><span class="unit"><input type="number" min="0" step="0.05" id="pad"><em>s</em></span></label>
-        <label class="num"><span>Drop shorter than<button type="button" class="tip" aria-label="About Drop shorter than" data-tip="Segments shorter than this are left out, such as coughs or one-word interjections.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="minSeg"><em>s</em></span></label>
+        <label class="num" for="maxDur"><span>Max length<button type="button" class="tip" aria-label="About Max length" data-tip="Consecutive turns of the same speaker are joined only while the segment stays this long or shorter. One long turn is never split. Empty means no limit: one segment per speaker turn.">i</button></span><span class="unit"><input type="number" min="0" step="1" id="maxDur" placeholder="none"><em>s</em></span></label>
+        <label class="num" for="maxGap"><span>Merge gaps up to<button type="button" class="tip" aria-label="About Merge gaps up to" data-tip="Joins two turns of the same speaker when the pause between them is this short or shorter and nobody else speaks in between.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="maxGap"><em>s</em></span></label>
+        <label class="num" for="pad"><span>Edge padding<button type="button" class="tip" aria-label="About Edge padding" data-tip="Extra time added before and after each segment so first and last words aren&#x27;t clipped. It never reaches into another speaker&#x27;s speech.">i</button></span><span class="unit"><input type="number" min="0" step="0.05" id="pad"><em>s</em></span></label>
+        <label class="num" for="minSeg"><span>Drop shorter than<button type="button" class="tip" aria-label="About Drop shorter than" data-tip="Segments shorter than this are left out, such as coughs or one-word interjections.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="minSeg"><em>s</em></span></label>
       </div>
-      <label class="switch">
+      <label class="switch" for="dropOverlap">
         <span><b>Cut out overlapping speech<button type="button" class="tip" aria-label="About Cut out overlapping speech" data-tip="Removes moments where two or more people talk at once, so each segment has one speaker. Turn off to keep those moments inside segments.">i</button></b><small>Keeps one speaker per segment</small></span>
         <input type="checkbox" id="dropOverlap"><i></i>
       </label>
@@ -91,9 +91,9 @@
     <section>
       <h2>Speakers <small>Leave empty for auto</small></h2>
       <div class="grid three">
-        <label class="num"><span>Exactly<button type="button" class="tip" aria-label="About Exactly" data-tip="The number of people speaking in the clip, if you know it. Often the easiest fix when two speakers get merged into one.">i</button></span><input type="number" min="0" step="1" id="numSpeakers" placeholder="auto"></label>
-        <label class="num"><span>At least<button type="button" class="tip" aria-label="About At least" data-tip="Lowest number of speakers to look for, when you don&#x27;t know the exact count.">i</button></span><input type="number" min="0" step="1" id="minSpeakers" placeholder="auto"></label>
-        <label class="num"><span>At most<button type="button" class="tip" aria-label="About At most" data-tip="Highest number of speakers to look for, when you don&#x27;t know the exact count.">i</button></span><input type="number" min="0" step="1" id="maxSpeakers" placeholder="auto"></label>
+        <label class="num" for="numSpeakers"><span>Exactly<button type="button" class="tip" aria-label="About Exactly" data-tip="The number of people speaking in the clip, if you know it. Often the easiest fix when two speakers get merged into one.">i</button></span><input type="number" min="0" step="1" id="numSpeakers" placeholder="auto"></label>
+        <label class="num" for="minSpeakers"><span>At least<button type="button" class="tip" aria-label="About At least" data-tip="Lowest number of speakers to look for, when you don&#x27;t know the exact count.">i</button></span><input type="number" min="0" step="1" id="minSpeakers" placeholder="auto"></label>
+        <label class="num" for="maxSpeakers"><span>At most<button type="button" class="tip" aria-label="About At most" data-tip="Highest number of speakers to look for, when you don&#x27;t know the exact count.">i</button></span><input type="number" min="0" step="1" id="maxSpeakers" placeholder="auto"></label>
       </div>
     </section>
     </div>

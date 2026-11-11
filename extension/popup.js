@@ -64,25 +64,34 @@ function info(parts) {
     return span;
   }));
 }
-function check() {
-  const seq = ++checkSeq;
+let health = null; // last /health answer, so warnings can be updated without asking the server again
+
+// Show the server state for the current settings (no network).
+function render() {
   const s = read();
-  setStatus("checking", "Checking");
-  info([]);
-  chrome.runtime.sendMessage({ type: "LSP_HEALTH", serverUrl: s.serverUrl }, (r) => {
+  if (!health) {
+    setStatus("down", "Offline");
+    info([["err", `Can't reach ${s.serverUrl}. Start the server, or fix the address, to change the other settings`]]);
+    return;
+  }
+  const d = health, p = d.providers || {};
+  const warn = [];
+  if (s.provider === "local" && d.hf_token_set === false) warn.push("HF_TOKEN is missing on the server");
+  if (s.provider === "pyannoteai" && !p.pyannoteai) warn.push("PYANNOTEAI_API_KEY is missing on the server");
+  if (s.removeMusic && d.separation === false) warn.push("music removal isn't installed (run uv sync on the server)");
+  setStatus(warn.length ? "warn" : "ok", d.cuda ? "Online, GPU" : "Online, CPU");
+  info(warn.length ? warn.map((w) => ["warn", w]) : [["", d.cuda ? "Connected. Running on GPU" : "Connected. Running on CPU"]]);
+}
+
+// Ask the server. The current message stays in place until the answer arrives, so nothing jumps.
+// quiet: background re-check, no "Checking" flash in the pill
+function check(quiet = false) {
+  const seq = ++checkSeq;
+  if (!quiet) setStatus("checking", "Checking");
+  chrome.runtime.sendMessage({ type: "LSP_HEALTH", serverUrl: read().serverUrl }, (r) => {
     if (seq !== checkSeq) return; // a newer check started
-    if (!r?.ok) {
-      setStatus("down", "Offline");
-      info([["err", `Can't reach ${s.serverUrl}. Start the server, or fix the address, to change the other settings`]]);
-      return;
-    }
-    const d = r.data, p = d.providers || {};
-    const warn = [];
-    if (s.provider === "local" && d.hf_token_set === false) warn.push("HF_TOKEN is missing on the server");
-    if (s.provider === "pyannoteai" && !p.pyannoteai) warn.push("PYANNOTEAI_API_KEY is missing on the server");
-    if (s.removeMusic && d.separation === false) warn.push("music removal isn't installed (run uv sync on the server)");
-    setStatus(warn.length ? "warn" : "ok", d.cuda ? "Online, GPU" : "Online, CPU");
-    info(warn.length ? warn.map((w) => ["warn", w]) : [["", d.cuda ? "Connected. Running on GPU" : "Connected. Running on CPU"]]);
+    health = r?.ok ? r.data : null;
+    render();
   });
 }
 
@@ -96,19 +105,20 @@ chrome.storage.sync.get(LSP_DEFAULTS, (s) => {
 let urlTimer;
 document.addEventListener("input", (e) => {
   save();
-  if (e.target.id === "serverUrl") { clearTimeout(urlTimer); urlTimer = setTimeout(check, 600); }
+  if (e.target.id === "serverUrl") { clearTimeout(urlTimer); urlTimer = setTimeout(() => check(), 600); }
 });
 document.addEventListener("change", (e) => {
   save();
-  if (e.target.name === "provider" || e.target.id === "removeMusic") check(); // warnings depend on these
+  if (e.target.name === "provider" || e.target.id === "removeMusic") render(); // warnings depend on these; no server call needed
 });
-el("status").onclick = check;
+el("status").onclick = () => check();
+setInterval(() => check(true), 10000); // notice the server going down (or coming back) while the popup is open
 document.querySelector("details.lockable summary").addEventListener("click", (e) => {
   if (document.body.classList.contains("offline")) e.preventDefault();
 });
 el("reset").onclick = () => {
   write(LSP_DEFAULTS);
-  chrome.storage.sync.set(read(), check);
+  chrome.storage.sync.set(read(), () => check());
   el("saved").textContent = "Defaults restored";
 };
 

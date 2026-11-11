@@ -10,7 +10,7 @@ function b64ToBytes(b64) {
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "LSP_HEALTH") {
-    fetch(msg.serverUrl.replace(/\/$/, "") + "/health")
+    fetch(msg.serverUrl.replace(/\/$/, "") + "/health", { signal: AbortSignal.timeout(5000) }) // a dead tunnel can hang
       .then((r) => r.json())
       .then((j) => sendResponse({ ok: true, data: j }))
       .catch((e) => sendResponse({ ok: false, error: String(e) }));
