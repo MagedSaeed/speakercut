@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  body{font:13px system-ui,sans-serif;width:300px;margin:10px}
+  label{display:flex;justify-content:space-between;align-items:center;margin:5px 0;gap:8px}
+  input[type=text]{width:170px} input[type=number]{width:70px}
+  h3{margin:0 0 6px} .muted{color:#666;font-size:12px} #msg{margin-top:6px;min-height:16px}
+  button{margin-top:6px}
+</style></head>
+<body>
+  <h3 style="display:flex;align-items:center;gap:8px"><img src="icons/icon48.png" width="28" height="28"> SpeakerCut</h3>
+  <div class="muted">Adds draft speaker segments only. Never submits.</div>
+  <label>Server URL <input type="text" id="serverUrl"></label>
+  <label>Diarization provider
+    <select id="provider">
+      <option value="local">Local pyannote (free)</option>
+      <option value="pyannoteai">pyannoteAI Precision (API key)</option>
+      <option value="elevenlabs">ElevenLabs Scribe (API key)</option>
+    </select></label>
+  <label>Remove music first (Demucs) <input type="checkbox" id="removeMusic"></label>
+  <label>Max segment length (s, 0 = no limit) <input type="number" step="1" id="maxDur"></label>
+  <label>Max same-speaker gap to merge (s) <input type="number" step="0.1" id="maxGap"></label>
+  <label>Edge padding (s) <input type="number" step="0.05" id="pad"></label>
+  <label>Min segment length (s) <input type="number" step="0.1" id="minSeg"></label>
+  <label>Exact speakers (0 = auto) <input type="number" step="1" id="numSpeakers"></label>
+  <label>Min / max speakers (0 = auto) <span><input type="number" step="1" id="minSpeakers" style="width:42px"> <input type="number" step="1" id="maxSpeakers" style="width:42px"></span></label>
+  <label>Cut out overlapping speech <input type="checkbox" id="dropOverlap"></label>
+  <details><summary class="muted">Label config names</summary>
+    <label>Labels from_name <input type="text" id="fromName"></label>
+    <label>Audio to_name <input type="text" id="toName"></label>
+    <label>Label value <input type="text" id="label"></label>
+  </details>
+  <button id="save">Save</button> <button id="test">Test server</button>
+  <div id="msg" class="muted"></div>
+  <script src="defaults.js"></script>
+  <script src="popup.js"></script>
+</body></html>

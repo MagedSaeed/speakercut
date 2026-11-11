@@ -1,0 +1,26 @@
+[project]
+name = "speakercut-server"
+version = "0.1.0"
+description = "pyannote diarization service for the SpeakerCut Chrome extension"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "pyannote.audio>=3.3",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "python-multipart>=0.0.9",
+    "soundfile>=0.12",
+    "numpy",
+    "python-dotenv>=1.0",
+    "torch",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+# Optional music/background removal before diarization (Demucs vocals)
+separation = ["demucs>=4.0.1"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false

@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body><div class="lsf-main-view__annotation"><div id="cfg">
+<div id="linksrow" style="display:flex;justify-content:center;align-items:center;gap:12px;width:100%;margin-bottom:8px;">
+ <div style="border:1px solid #ccc;border-radius:7px;padding:5px 12px;background:#fafafa;"><a href="#" style="text-decoration:none;font-size:14px;font-weight:600;">🎥 Video Tutorial</a></div>
+ <div style="border:1px solid #ccc;border-radius:7px;padding:5px 12px;background:#fafafa;"><a href="#" style="text-decoration:none;font-size:14px;font-weight:600;">📘 Guidelines</a></div>
+</div>
+<div style="display:flex;gap:14px"><div style="flex:0 0 42%;height:200px;background:#222;color:#fff">video</div><div style="flex:1;border:1px solid #ddd;height:200px">Select one or more speaker segments… <span style="background:#4A90E2;color:#fff;padding:2px 6px">+ Add Segment</span></div></div>
+</div></div><button id="submit" onclick="window.__submits=(window.__submits||0)+1">Submit</button>
+<script>
+const regions=[]; window.__submits=0;
+const sr=44100, pcm=new Float32Array(sr*20).map((_,i)=>0.3*Math.sin(i/sr*2*Math.PI*440));
+const dec={chunks:[[]],_sampleRate:0}, ws={loaded:false,media:{audio:{decoder:dec}}};
+const names=new Map([['audio',{_ws:ws}]]);
+setTimeout(()=>{dec.chunks=[[pcm]];dec._sampleRate=sr;ws.loaded=true;}, 2500);
+window.__mediaFetches=0;
+const ann={id:7,names,readonly:false,get regions(){return regions},
+  appendResults(rs){rs.forEach(r=>regions.push({id:'r'+Math.random().toString(36).slice(2),result:r}))},
+  deleteRegion(r){regions.splice(regions.indexOf(r),1)},
+  serializeAnnotation(){return regions.map(r=>r.result)},
+  submitAnnotation(){window.__submits++}, updateAnnotation(){window.__submits++}};
+window.Htx={task:{id:101169,data:JSON.stringify({video:location.origin+'/cinnamon/data/local-files/?d=Yemen/Tazzi/sample.mp4'})},annotationStore:{selected:ann}};
+</script></body></html>
