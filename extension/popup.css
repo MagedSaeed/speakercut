@@ -148,7 +148,8 @@ input::placeholder { color: var(--muted); opacity: .8; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-bottom: 6px; }
 .grid.three { grid-template-columns: repeat(3, 1fr); }
 .num { display: block; }
-.num > span:first-child { display: block; margin-bottom: 3px; font-size: 11.5px; color: var(--muted); }
+.num > span:first-child { display: block; margin-bottom: 3px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.num .tip { margin-left: 3px; }
 .unit { position: relative; display: block; }
 .unit input { padding-right: 22px; }
 .unit em { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11.5px; color: var(--muted); pointer-events: none; }

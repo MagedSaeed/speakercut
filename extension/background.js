@@ -22,7 +22,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         const s = msg.settings;
         const fd = new FormData();
         fd.append("file", new Blob([b64ToBytes(msg.wavB64)], { type: "audio/wav" }), "audio.wav");
-        fd.append("max_gap", String(s.maxGap));
         fd.append("max_dur", String(s.maxDur));
         fd.append("pad", String(s.pad));
         fd.append("min_seg", String(s.minSeg));

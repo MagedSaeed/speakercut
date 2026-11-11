@@ -52,7 +52,8 @@ def test_padding_clamped_to_file_bounds_and_min_seg():
     assert spans(out) == [("B", 0.8, 6.0)]
 
 
-def test_large_gap_not_merged():
+def test_long_pause_same_speaker_merged():
+    # a pause alone never splits a segment; only another speaker or max_dur does
     turns = [Seg(0, 3, "A"), Seg(8, 11, "A")]
-    out = build_segments(turns, 12, pad=0, max_gap=1.5)
-    assert len(out) == 2
+    out = build_segments(turns, 12, pad=0)
+    assert spans(out) == [("A", 0, 11)]

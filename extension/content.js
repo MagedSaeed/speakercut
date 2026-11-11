@@ -11,7 +11,7 @@
     fromName: "speaker_segments",
     toName: "audio",
     label: "Speaker segment",
-    maxDur: 30, maxGap: 1.5, pad: 0.2, minSeg: 1.0, numSpeakers: 0, minSpeakers: 0, maxSpeakers: 0, dropOverlap: true, provider: "local", removeMusic: false
+    maxDur: 30, pad: 0.2, minSeg: 1.0, numSpeakers: 0, minSpeakers: 0, maxSpeakers: 0, dropOverlap: true, provider: "local", removeMusic: false
   };
   const TARGET_SR = 16000;
 

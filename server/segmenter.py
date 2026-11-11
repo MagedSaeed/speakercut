@@ -62,7 +62,6 @@ def _subtract(seg: Seg, holes: list[tuple[float, float]]) -> list[Seg]:
 def build_segments(
     turns: list[Seg],
     duration: float,
-    max_gap: float = 1.5,
     max_dur: float = 30.0,
     pad: float = 0.2,
     min_piece: float = 0.3,
@@ -87,14 +86,13 @@ def build_segments(
         if merged:
             cur = merged[-1]
             same = cur.speaker == p.speaker
-            gap_ok = p.start - cur.end <= max_gap
             len_ok = max_dur <= 0 or (p.end - cur.start) <= max_dur
             # nobody else (including overlap) may speak inside the gap
             clean_gap = not any(
                 t.speaker != p.speaker and t.start < p.start and t.end > cur.end
                 for t in turns
             )
-            if same and gap_ok and len_ok and clean_gap:
+            if same and len_ok and clean_gap:
                 cur.end = max(cur.end, p.end)
                 continue
         merged.append(Seg(p.start, p.end, p.speaker))

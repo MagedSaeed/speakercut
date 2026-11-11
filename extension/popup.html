@@ -76,11 +76,10 @@
     <div class="col lockable">
     <section>
       <h2>Segments</h2>
-      <div class="grid">
+      <div class="grid three">
         <label class="num" for="maxDur"><span>Max length<button type="button" class="tip" aria-label="About Max length" data-tip="Consecutive turns of the same speaker are joined only while the segment stays this long or shorter. One long turn is never split. Empty means no limit: one segment per speaker turn.">i</button></span><span class="unit"><input type="number" min="0" step="1" id="maxDur" placeholder="none"><em>s</em></span></label>
-        <label class="num" for="maxGap"><span>Merge gaps up to<button type="button" class="tip" aria-label="About Merge gaps up to" data-tip="Joins two turns of the same speaker when the pause between them is this short or shorter and nobody else speaks in between.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="maxGap"><em>s</em></span></label>
-        <label class="num" for="pad"><span>Edge padding<button type="button" class="tip" aria-label="About Edge padding" data-tip="Extra time added before and after each segment so first and last words aren&#x27;t clipped. It never reaches into another speaker&#x27;s speech.">i</button></span><span class="unit"><input type="number" min="0" step="0.05" id="pad"><em>s</em></span></label>
-        <label class="num" for="minSeg"><span>Drop shorter than<button type="button" class="tip" aria-label="About Drop shorter than" data-tip="Segments shorter than this are left out, such as coughs or one-word interjections.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="minSeg"><em>s</em></span></label>
+        <label class="num" for="pad"><span>Padding<button type="button" class="tip" aria-label="About Padding" data-tip="Extra time added before and after each segment so first and last words aren&#x27;t clipped. It never reaches into another speaker&#x27;s speech.">i</button></span><span class="unit"><input type="number" min="0" step="0.05" id="pad"><em>s</em></span></label>
+        <label class="num" for="minSeg"><span>Min length<button type="button" class="tip" aria-label="About Min length" data-tip="Segments shorter than this are left out, such as coughs or one-word interjections.">i</button></span><span class="unit"><input type="number" min="0" step="0.1" id="minSeg"><em>s</em></span></label>
       </div>
       <label class="switch" for="dropOverlap">
         <span><b>Cut out overlapping speech<button type="button" class="tip" aria-label="About Cut out overlapping speech" data-tip="Removes moments where two or more people talk at once, so each segment has one speaker. Turn off to keep those moments inside segments.">i</button></b><small>Keeps one speaker per segment</small></span>

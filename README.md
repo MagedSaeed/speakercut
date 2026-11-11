@@ -103,7 +103,7 @@ Open a task. A row with **Presegment** / **Remove auto** appears right under the
 ## Segmentation rules (server/segmenter.py)
 
 1. Overlapping speech (2+ speakers at once) is cut out.
-2. Consecutive turns of the same speaker are merged if the gap is ≤ `max_gap` (1.5 s), nobody else speaks in the gap, and the result stays ≤ `max_dur` (30 s; 0 = unlimited, i.e. one segment per speaker turn).
+2. Consecutive turns of the same speaker are merged, however long the pause, as long as nobody else speaks in between and the result stays ≤ `max_dur` (30 s; 0 = unlimited, i.e. one segment per speaker turn).
 3. Edges are padded by `pad` (0.2 s) so words aren't clipped, but never into another speaker's speech.
 4. Segments shorter than `min_seg` (1 s) are dropped.
 

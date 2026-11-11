@@ -5,7 +5,6 @@ const LSP_DEFAULTS = {
   toName: "audio",
   label: "Speaker segment",
   maxDur: 30,
-  maxGap: 1.5,
   pad: 0.2,
   minSeg: 1.0,
   numSpeakers: 0,

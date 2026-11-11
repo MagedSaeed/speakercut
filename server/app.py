@@ -84,7 +84,6 @@ async def diarize(
     file: UploadFile = File(...),
     provider: str = Form("local"),
     remove_music: bool = Form(False),
-    max_gap: float = Form(1.5),
     max_dur: float = Form(30.0),
     pad: float = Form(0.2),
     min_seg: float = Form(1.0),
@@ -130,7 +129,7 @@ async def diarize(
     except RuntimeError as e:
         raise HTTPException(500, str(e))
 
-    segs = build_segments(turns, duration, max_gap=max_gap, max_dur=max_dur, pad=pad,
+    segs = build_segments(turns, duration, max_dur=max_dur, pad=pad,
                           min_seg=min_seg, drop_overlap=drop_overlap)
     return {
         "provider": provider,
