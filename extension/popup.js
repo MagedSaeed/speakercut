@@ -52,8 +52,7 @@ function setStatus(state, text) {
 function lock(on) {
   document.body.classList.toggle("offline", on);
   document.querySelectorAll(".lockable input").forEach((i) => (i.disabled = on));
-  const d = document.querySelector("details.lockable");
-  if (on && d.open) d.open = false;
+  if (on) document.querySelectorAll("details.lockable").forEach((d) => (d.open = false));
 }
 function info(parts) {
   const box = el("serverInfo");
@@ -113,9 +112,9 @@ document.addEventListener("change", (e) => {
 });
 el("status").onclick = () => check();
 setInterval(() => check(true), 10000); // notice the server going down (or coming back) while the popup is open
-document.querySelector("details.lockable summary").addEventListener("click", (e) => {
+document.querySelectorAll("details.lockable summary").forEach((sum) => sum.addEventListener("click", (e) => {
   if (document.body.classList.contains("offline")) e.preventDefault();
-});
+}));
 el("reset").onclick = () => {
   write(LSP_DEFAULTS);
   chrome.storage.sync.set(read(), () => check());

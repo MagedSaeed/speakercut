@@ -157,6 +157,7 @@ input::placeholder { color: var(--muted); opacity: .8; }
 details { padding: 12px 0; }
 summary { cursor: pointer; font-size: 12px; font-weight: 550; color: var(--muted); list-style: none; }
 summary::-webkit-details-marker { display: none; }
+summary small { margin-left: 6px; font-weight: 400; font-size: 11.5px; opacity: .8; }
 summary::before { content: "▸"; display: inline-block; width: 12px; transition: transform .15s; }
 details[open] summary::before { transform: rotate(90deg); }
 details[open] summary { margin-bottom: 8px; }

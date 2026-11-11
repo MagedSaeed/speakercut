@@ -72,6 +72,23 @@ def _to_wav_bytes(wav: torch.Tensor, sr: int) -> bytes:
     return buf.getvalue()
 
 
+def _quiet_finder(wav: torch.Tensor, sr: int):
+    """quiet_point(lo, hi) for the segmenter: the quietest moment (smoothed loudness) in [lo, hi] s."""
+    x = wav.squeeze(0).numpy()
+    hop = max(1, int(sr * 0.01))  # 10 ms frames
+    n = len(x) // hop
+    if n == 0:
+        return None
+    rms = np.sqrt((x[: n * hop].reshape(n, hop).astype(np.float64) ** 2).mean(1))
+    smooth = np.convolve(rms, np.ones(25) / 25, mode="same")  # ~250 ms, so a breath beats a single quiet frame
+
+    def quiet_point(lo: float, hi: float):
+        a, b = max(0, int(lo * 100)), min(n, int(hi * 100))
+        return None if b <= a else (a + int(np.argmin(smooth[a:b]))) / 100
+
+    return quiet_point
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "model": MODEL, "loaded": _pipeline is not None, "cuda": torch.cuda.is_available(),
@@ -130,7 +147,7 @@ async def diarize(
         raise HTTPException(500, str(e))
 
     segs = build_segments(turns, duration, max_dur=max_dur, pad=pad,
-                          min_seg=min_seg, drop_overlap=drop_overlap)
+                          min_seg=min_seg, drop_overlap=drop_overlap, quiet_point=_quiet_finder(wav, sr))
     return {
         "provider": provider,
         "remove_music": remove_music,

@@ -5,11 +5,13 @@ Pure Python (no pyannote dependency) so it can be unit-tested.
 Rules follow the Cinnamon guidelines:
   * one speaker only, no overlapping speech      -> overlap is cut out
   * complete utterance, don't clip edges         -> small padding, clamped
-  * target duration ~30 s                         -> merge same-speaker turns up to max_dur
+  * target duration ~30 s                         -> join same-speaker turns, then split anything longer
+                                                     than max_dur at a pause (or the quietest moment)
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
+from typing import Callable, Optional
 
 
 @dataclass
@@ -59,6 +61,43 @@ def _subtract(seg: Seg, holes: list[tuple[float, float]]) -> list[Seg]:
     return pieces
 
 
+def _split_run(run: list[Seg], limit: float, min_pause: float,
+               quiet_point: Optional[Callable[[float, float], Optional[float]]]) -> list[Seg]:
+    """Split one speaker's run into segments of at most `limit` seconds.
+
+    Prefers the latest pause before the limit that is long enough for padding on both sides
+    (>= min_pause). If there is none in the second half of the window, cuts at the quietest moment
+    of the audio there instead (one long turn); without audio it falls back to the latest pause, then
+    to a hard cut at the limit.
+    """
+    spk, end = run[0].speaker, max(q.end for q in run)
+    gaps: list[tuple[float, float]] = []  # silences between the run's pieces: (left end, right start)
+    reach = run[0].end
+    for q in run[1:]:
+        if q.start > reach:
+            gaps.append((reach, q.start))
+        reach = max(reach, q.end)
+    pauses = [g for g in gaps if g[1] - g[0] >= min_pause - 1e-9]
+
+    out: list[Seg] = []
+    start = run[0].start
+    while end - start > limit + 1e-9:
+        cap = start + limit
+        fits = [g for g in pauses if start < g[0] <= cap]
+        cut = fits[-1] if fits and fits[-1][0] - start >= limit / 2 else None
+        if cut is None and quiet_point is not None:
+            t = quiet_point(start + limit / 2, cap)
+            if t is not None and start < t <= cap:
+                # landing in a short silence: cut around it rather than through it
+                cut = next(((g0, g1) for g0, g1 in gaps if g0 <= t <= g1), (t, t))
+        if cut is None:
+            cut = fits[-1] if fits else (cap, cap)
+        out.append(Seg(start, cut[0], spk))
+        start = cut[1]
+    out.append(Seg(start, end, spk))
+    return out
+
+
 def build_segments(
     turns: list[Seg],
     duration: float,
@@ -67,7 +106,10 @@ def build_segments(
     min_piece: float = 0.3,
     min_seg: float = 1.0,
     drop_overlap: bool = True,
+    quiet_point: Optional[Callable[[float, float], Optional[float]]] = None,
 ) -> list[Seg]:
+    """quiet_point(lo, hi) -> time of the quietest moment in [lo, hi] (from the audio), or None.
+    Used to split one long turn that has no usable pause before max_dur."""
     turns = [Seg(float(t.start), float(t.end), str(t.speaker)) for t in turns if t.end > t.start]
     turns.sort(key=lambda t: t.start)
 
@@ -80,24 +122,28 @@ def build_segments(
     pieces = [p for p in pieces if p.dur >= min_piece]
     pieces.sort(key=lambda p: p.start)
 
-    # 2. merge consecutive pieces of the same speaker (no other speaker in between)
-    merged: list[Seg] = []
+    # 2. join consecutive pieces of the same speaker while nobody else (including overlap) speaks in between
+    runs: list[list[Seg]] = []
     for p in pieces:
-        if merged:
-            cur = merged[-1]
-            same = cur.speaker == p.speaker
-            len_ok = max_dur <= 0 or (p.end - cur.start) <= max_dur
-            # nobody else (including overlap) may speak inside the gap
-            clean_gap = not any(
-                t.speaker != p.speaker and t.start < p.start and t.end > cur.end
-                for t in turns
-            )
-            if same and len_ok and clean_gap:
-                cur.end = max(cur.end, p.end)
+        if runs and runs[-1][-1].speaker == p.speaker:
+            last_end = max(q.end for q in runs[-1])
+            if not any(t.speaker != p.speaker and t.start < p.start and t.end > last_end for t in turns):
+                runs[-1].append(p)
                 continue
-        merged.append(Seg(p.start, p.end, p.speaker))
+        runs.append([p])
 
-    # 3. pad edges, clamped so we never reach into a neighbour's speech
+    # 3. split runs longer than max_dur. The limit leaves room for padding on both sides,
+    #    so finished segments stay within max_dur.
+    limit = max_dur - 2 * pad if max_dur > 2 * pad else max_dur
+    merged: list[Seg] = []
+    for run in runs:
+        if limit > 0:
+            merged.extend(_split_run(run, limit, 2 * pad, quiet_point))
+        else:
+            merged.append(Seg(run[0].start, max(q.end for q in run), run[0].speaker))
+    merged.sort(key=lambda s: s.start)
+
+    # 4. pad edges, clamped so we never reach into a neighbour's speech
     #    (all speech, including overlap regions, counts as a neighbour)
     out: list[Seg] = []
     for i, s in enumerate(merged):
@@ -112,6 +158,10 @@ def build_segments(
                 hi = min(hi, t.start)
         if i > 0:
             lo = max(lo, out[-1].end if out else 0.0)
+        for m in merged[i + 1:]:  # nor into the next segment (a split inside one turn has no gap)
+            if m.start >= s.end - 1e-6:
+                hi = min(hi, m.start)
+                break
         start = max(lo, s.start - pad) if lo <= s.start else s.start
         end = min(hi, s.end + pad) if hi >= s.end else s.end
         out.append(Seg(round(start, 3), round(end, 3), s.speaker))

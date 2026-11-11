@@ -57,3 +57,30 @@ def test_long_pause_same_speaker_merged():
     turns = [Seg(0, 3, "A"), Seg(8, 11, "A")]
     out = build_segments(turns, 12, pad=0)
     assert spans(out) == [("A", 0, 11)]
+
+
+def test_cut_at_pause_long_enough_for_padding():
+    # pauses: 0.1 s at 18 (too short for 2 x 0.2 padding), 1.0 s at 15; limit is 20 - 0.4 = 19.6
+    turns = [Seg(0, 15, "A"), Seg(16, 18, "A"), Seg(18.1, 30, "A")]
+    out = build_segments(turns, 31, pad=0.2, max_dur=20)
+    assert [(s.start, s.end) for s in out] == [(0, 15.2), (15.8, 30.2)]
+    assert all(s.dur <= 20 for s in out)
+
+
+def test_long_turn_split_at_quietest_moment():
+    turns = [Seg(0, 50, "A")]  # one 50 s turn, no pauses
+    out = build_segments(turns, 50, pad=0.2, max_dur=30, quiet_point=lambda lo, hi: 22.0)
+    assert [(s.start, s.end) for s in out] == [(0, 22.0), (22.0, 50)]  # no padding across the cut
+
+
+def test_long_turn_without_audio_hard_cut_within_limit():
+    out = build_segments([Seg(0, 50, "A")], 50, pad=0.2, max_dur=30)
+    assert len(out) == 2 and all(s.dur <= 30 for s in out)
+
+
+def test_padded_segments_never_exceed_max_dur():
+    turns = [Seg(i * 3, i * 3 + 2.6, "A") for i in range(40)]  # 2 min of A with 0.4 s pauses
+    out = build_segments(turns, 125, pad=0.2, max_dur=30)
+    assert len(out) >= 4 and all(s.dur <= 30 + 1e-6 for s in out)
+    for a, b in zip(out, out[1:]):
+        assert a.end <= b.start
