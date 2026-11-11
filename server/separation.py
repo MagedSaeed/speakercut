@@ -1,8 +1,7 @@
-"""Optional music/background removal before diarization (Demucs vocal separation).
+"""Music/background removal before diarization (Demucs vocal separation).
 
 Only the *diarization input* is cleaned. Timing is preserved, so segment boundaries
 still line up with the original audio that annotators listen to.
-Install with:  uv sync --extra separation
 """
 from __future__ import annotations
 

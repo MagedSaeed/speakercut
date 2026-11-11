@@ -13,7 +13,7 @@ Requires [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/inst
 
 ```bash
 cd server
-uv sync                  # creates .venv from pyproject.toml + uv.lock (pyannote.audio 4.x, torch)
+uv sync                  # creates .venv from pyproject.toml + uv.lock (pyannote.audio 4.x, torch, demucs)
 cp .env.example .env     # then put your HF_TOKEN in .env
 uv run uvicorn app:app --host 127.0.0.1 --port 8000
 ```
@@ -37,7 +37,7 @@ Pick these in the extension popup:
 | Local pyannote (default) | `HF_TOKEN` | Free, runs on your GPU/CPU. |
 | pyannoteAI Precision | `PYANNOTEAI_API_KEY` | Hosted premium models from the pyannote authors (`PYANNOTEAI_MODEL=precision-2` or `precision-3`). Best choice when speakers get mixed. Paid per audio second; uploads are auto-deleted within 48 h. |
 
-**Remove music first** runs Demucs vocal separation before diarization (`uv sync --extra separation`). Cut points are computed on the vocals but line up with the original audio. Helps with loud background music in series; leave it off for clean speech. Roughly real-time on CPU, seconds on GPU.
+**Remove music first** runs Demucs vocal separation before diarization. Cut points are computed on the vocals but line up with the original audio. Helps with loud background music in series; leave it off for clean speech. Roughly real-time on CPU, seconds on GPU.
 
 **Speaker-count hints** (exact, or min/max) are often the cheapest fix when two speakers get merged: if you know a clip has 3 people, say so.
 

@@ -32,7 +32,7 @@ el("test").onclick = () => {
     const warn = [];
     if (prov === "local" && d.hf_token_set === false) warn.push("HF_TOKEN missing");
     if (prov === "pyannoteai" && !p.pyannoteai) warn.push("PYANNOTEAI_API_KEY missing");
-    if (read().removeMusic && d.separation === false) warn.push("music removal not installed (uv sync --extra separation)");
+    if (read().removeMusic && d.separation === false) warn.push("music removal not installed (run uv sync on the server)");
     msg(`OK · ${d.cuda ? "GPU" : "CPU"} · keys: ${["local","pyannoteai"].filter(k=>p[k]).join(", ") || "none"}` +
         (warn.length ? " · ⚠ " + warn.join("; ") : ""));
   });

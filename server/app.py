@@ -106,7 +106,7 @@ async def diarize(
     # Optional: diarize on the vocals stem only (music/background removed). Timing is unchanged.
     if remove_music:
         if not separation.available():
-            raise HTTPException(400, "Music removal is not installed. Run: uv sync --extra separation")
+            raise HTTPException(400, "Music removal (demucs) is not installed. Run: uv sync")
         wav = await run_in_threadpool(separation.vocals_only, wav, sr, 16000)
         sr = 16000
 

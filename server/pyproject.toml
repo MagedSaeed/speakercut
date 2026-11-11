@@ -13,11 +13,8 @@ dependencies = [
     "python-dotenv>=1.0",
     "torch",
     "httpx>=0.27",
+    "demucs>=4.0.1",  # music/background removal before diarization
 ]
-
-[project.optional-dependencies]
-# Optional music/background removal before diarization (Demucs vocals)
-separation = ["demucs>=4.0.1"]
 
 [dependency-groups]
 dev = ["pytest>=8"]
