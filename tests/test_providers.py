@@ -44,23 +44,6 @@ def test_pyannoteai_failure(monkeypatch):
     with pytest.raises(providers.ProviderError, match="401"):
         providers.pyannoteai(b"WAV", 0, 0, 0)
 
-def test_elevenlabs_words_to_turns(monkeypatch):
-    monkeypatch.setenv("ELEVENLABS_API_KEY", "e")
-    def h(req):
-        assert req.headers["xi-api-key"] == "e"
-        body = req.content.decode("latin1")
-        for f in ['name="model_id"', "scribe_v2", 'name="diarize"', 'name="language_code"', "ara", 'name="num_speakers"']:
-            assert f in body, f
-        w = lambda t, s, e, sp: {"text": t, "type": "word", "start": s, "end": e, "speaker_id": sp, "logprob": 0}
-        return httpx.Response(200, json={"words": [
-            w("a", 0.0, 0.4, "speaker_0"), {"text": " ", "type": "spacing", "start": 0.4, "end": 0.5},
-            w("b", 0.5, 1.0, "speaker_0"), w("c", 1.2, 2.0, "speaker_1"), w("d", 2.1, 2.5, "speaker_1"),
-            w("e", 4.0, 4.5, "speaker_1")]})
-    patch_client(monkeypatch, h)
-    turns = providers.elevenlabs(b"WAV", 0, 0, 3)
-    assert [(t.speaker, t.start, t.end) for t in turns] == [("speaker_0", 0.0, 1.0), ("speaker_1", 1.2, 2.5), ("speaker_1", 4.0, 4.5)]
-
 def test_missing_keys(monkeypatch):
-    monkeypatch.delenv("PYANNOTEAI_API_KEY", raising=False); monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    monkeypatch.delenv("PYANNOTEAI_API_KEY", raising=False)
     with pytest.raises(providers.ProviderError): providers.pyannoteai(b"", 0, 0, 0)
-    with pytest.raises(providers.ProviderError): providers.elevenlabs(b"", 0, 0, 0)

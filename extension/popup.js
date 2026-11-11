@@ -7,6 +7,7 @@ chrome.storage.sync.get(LSP_DEFAULTS, (s) => {
     if (typeof LSP_DEFAULTS[k] === "boolean") el(k).checked = !!s[k];
     else el(k).value = s[k];
   });
+  if (!el("provider").value) el("provider").value = LSP_DEFAULTS.provider; // e.g. a removed provider was saved
 });
 
 function read() {
@@ -31,9 +32,8 @@ el("test").onclick = () => {
     const warn = [];
     if (prov === "local" && d.hf_token_set === false) warn.push("HF_TOKEN missing");
     if (prov === "pyannoteai" && !p.pyannoteai) warn.push("PYANNOTEAI_API_KEY missing");
-    if (prov === "elevenlabs" && !p.elevenlabs) warn.push("ELEVENLABS_API_KEY missing");
     if (read().removeMusic && d.separation === false) warn.push("music removal not installed (uv sync --extra separation)");
-    msg(`OK · ${d.cuda ? "GPU" : "CPU"} · keys: ${["local","pyannoteai","elevenlabs"].filter(k=>p[k]).join(", ") || "none"}` +
+    msg(`OK · ${d.cuda ? "GPU" : "CPU"} · keys: ${["local","pyannoteai"].filter(k=>p[k]).join(", ") || "none"}` +
         (warn.length ? " · ⚠ " + warn.join("; ") : ""));
   });
 };

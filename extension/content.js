@@ -155,7 +155,9 @@
         : await mediaToWavB64(info.mediaUrl, status); // fallback: waveform not loaded yet
       const secs = Math.round(duration);
       const mmss = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
-      const via = { local: "local pyannote", pyannoteai: "pyannoteAI", elevenlabs: "ElevenLabs" }[s.provider] || s.provider;
+      const providers = { local: "local pyannote", pyannoteai: "pyannoteAI" };
+      if (!providers[s.provider]) s.provider = "local"; // fall back if a no-longer-supported provider is saved
+      const via = providers[s.provider];
       status(`Diarizing ${mmss} of audio via ${via}${s.removeMusic ? " (music removed)" : ""}…`);
       const res = await bg({ type: "LSP_DIARIZE", wavB64: b64, settings: s });
       if (!res.segments?.length) { status(`No clean single-speaker segments found (${res.num_speakers} speakers).`, true); return; }

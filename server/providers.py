@@ -2,7 +2,6 @@
 
   local       pyannote open-source model on this machine (free; needs HF_TOKEN)
   pyannoteai  pyannoteAI hosted Precision models (paid; needs PYANNOTEAI_API_KEY)
-  elevenlabs  ElevenLabs Scribe speech-to-text with diarization (paid; needs ELEVENLABS_API_KEY)
 """
 from __future__ import annotations
 
@@ -34,7 +33,6 @@ def available() -> dict:
     return {
         "local": bool(os.environ.get("HF_TOKEN")),
         "pyannoteai": bool(os.environ.get("PYANNOTEAI_API_KEY")),
-        "elevenlabs": bool(os.environ.get("ELEVENLABS_API_KEY")),
     }
 
 
@@ -90,41 +88,3 @@ def pyannoteai(wav_bytes: bytes, num: int, lo: int, hi: int, timeout_s: float = 
                 raise ProviderError("pyannoteAI job timed out")
             time.sleep(2)
 
-
-# ---------------------------------------------------------------- ElevenLabs
-def elevenlabs(wav_bytes: bytes, num: int, lo: int, hi: int, word_gap: float = 0.6) -> list[Seg]:
-    key = os.environ.get("ELEVENLABS_API_KEY")
-    if not key:
-        raise ProviderError("ELEVENLABS_API_KEY is not set in server/.env")
-    data = {
-        "model_id": os.environ.get("ELEVENLABS_MODEL", "scribe_v2"),
-        "diarize": "true",
-        "timestamps_granularity": "word",
-        "tag_audio_events": "false",
-    }
-    lang = os.environ.get("ELEVENLABS_LANGUAGE", "ara")
-    if lang:
-        data["language_code"] = lang
-    max_spk = num if num > 0 else hi  # ElevenLabs only takes a maximum
-    if max_spk > 0:
-        data["num_speakers"] = str(max_spk)
-    with httpx.Client(timeout=600) as c:
-        r = c.post(
-            "https://api.elevenlabs.io/v1/speech-to-text",
-            headers={"xi-api-key": key},
-            data=data,
-            files={"file": ("audio.wav", wav_bytes, "audio/wav")},
-        )
-    if r.status_code >= 300:
-        raise ProviderError(f"ElevenLabs {r.status_code}: {r.text[:300]}")
-    words = [w for w in r.json().get("words", [])
-             if w.get("type") == "word" and w.get("start") is not None and w.get("end") is not None]
-    # words -> speaker turns (contiguous words of one speaker)
-    turns: list[Seg] = []
-    for w in words:
-        spk = str(w.get("speaker_id") or "speaker_0")
-        if turns and turns[-1].speaker == spk and w["start"] - turns[-1].end <= word_gap:
-            turns[-1].end = max(turns[-1].end, float(w["end"]))
-        else:
-            turns.append(Seg(float(w["start"]), float(w["end"]), spk))
-    return turns

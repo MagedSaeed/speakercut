@@ -4,7 +4,7 @@ Run:
     cp .env.example .env          # put your HF_TOKEN in .env (must have accepted the model's terms)
     uv run uvicorn app:app --host 127.0.0.1 --port 8000
 
-POST /diarize  (multipart: file=<mono WAV>, provider=local|pyannoteai|elevenlabs, remove_music, ...)
+POST /diarize  (multipart: file=<mono WAV>, provider=local|pyannoteai, remove_music, ...)
 GET  /health
 """
 from __future__ import annotations
@@ -122,9 +122,6 @@ async def diarize(
             turns = [Seg(t.start, t.end, spk) for t, _, spk in ann.itertracks(yield_label=True)]
         elif provider == "pyannoteai":
             turns = await run_in_threadpool(providers.pyannoteai, _to_wav_bytes(wav, sr),
-                                            num_speakers, min_speakers, max_speakers)
-        elif provider == "elevenlabs":
-            turns = await run_in_threadpool(providers.elevenlabs, _to_wav_bytes(wav, sr),
                                             num_speakers, min_speakers, max_speakers)
         else:
             raise HTTPException(400, f"Unknown provider {provider!r}")

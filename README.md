@@ -36,7 +36,6 @@ Pick these in the extension popup:
 |---|---|---|
 | Local pyannote (default) | `HF_TOKEN` | Free, runs on your GPU/CPU. |
 | pyannoteAI Precision | `PYANNOTEAI_API_KEY` | Hosted premium models from the pyannote authors (`PYANNOTEAI_MODEL=precision-2` or `precision-3`). Best choice when speakers get mixed. Paid per audio second; uploads are auto-deleted within 48 h. |
-| ElevenLabs Scribe | `ELEVENLABS_API_KEY` | Speech-to-text with diarization (`scribe_v2`, Arabic). Speaker changes come from word-level speaker labels; it does not report overlapping speech. |
 
 **Remove music first** runs Demucs vocal separation before diarization (`uv sync --extra separation`). Cut points are computed on the vocals but line up with the original audio. Helps with loud background music in series; leave it off for clean speech. Roughly real-time on CPU, seconds on GPU.
 
