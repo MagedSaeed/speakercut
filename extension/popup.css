@@ -1,0 +1,215 @@
+:root {
+  --ink: #1E2A44;          /* logo navy */
+  --ink-2: #2D3E66;
+  --blue: #2F7FD8;         /* speaker A, darkened for contrast on white */
+  --blue-soft: #E8F2FD;
+  --amber: #B7791F;        /* speaker B, darkened for text */
+  --amber-soft: #FFF4E0;
+  --text: #1B2233;
+  --muted: #687389;
+  --line: #E3E7EF;
+  --field: #F5F7FA;
+  --bg: #FFFFFF;
+  --ok: #1F9D66;
+  --bad: #D14343;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --blue: #6AB2FF; --blue-soft: #1D2D47; --amber: #FFC266; --amber-soft: #3A2E18;
+    --text: #E6EAF2; --muted: #95A0B5; --line: #2A3347; --field: #1B2232; --bg: #141A26;
+    --ok: #4CC38A; --bad: #F07272;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+html { background: var(--bg); overflow-x: hidden; } /* the vertical scrollbar must not cause a horizontal one */
+body {
+  width: 600px;
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar: slim rounded thumb on a clear track, matching the inputs.
+   (Only ::-webkit-scrollbar is used: setting the standard scrollbar-color would override it in Chrome.) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 45%, transparent);
+  border: 3px solid var(--bg);   /* inset look: the thumb floats away from the edge */
+  border-radius: 999px;
+  min-height: 40px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+::-webkit-scrollbar-thumb:active { background: var(--blue); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Header: the logo's split waveform, blue speaker | cut | amber speaker */
+.hero {
+  position: relative;
+  padding: 16px 16px 18px;
+  background: linear-gradient(135deg, var(--ink), var(--ink-2));
+  color: #fff;
+  overflow: hidden;
+}
+.wave { position: absolute; right: 0; bottom: -10px; width: 340px; height: 44px; opacity: .38; }
+.brand { position: relative; display: flex; align-items: center; gap: 10px; }
+.brand img { border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+.brand h1 { flex: 1; margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+.tagline { position: relative; margin: 8px 0 0; font-size: 12px; color: rgba(255,255,255,.75); }
+
+.status {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px 3px 7px;
+  font: 500 11.5px/1.4 inherit; font-family: inherit;
+  color: #fff; background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 999px; cursor: pointer;
+}
+.status:hover { background: rgba(255,255,255,.2); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #C4CCDA; }
+.status[data-state="ok"] .dot { background: #4CD68E; box-shadow: 0 0 0 3px rgba(76,214,142,.25); }
+.status[data-state="warn"] .dot { background: #FFB547; box-shadow: 0 0 0 3px rgba(255,181,71,.25); }
+.status[data-state="down"] .dot { background: #FF6B6B; box-shadow: 0 0 0 3px rgba(255,107,107,.25); }
+.status[data-state="checking"] .dot { animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: .35; } to { opacity: 1; } }
+
+/* Two columns so everything fits in Chrome's 600px popup height without scrolling */
+main { display: grid; grid-template-columns: 1fr 1fr; padding: 0 16px; }
+.col { min-width: 0; }
+.col + .col { padding-left: 18px; margin-left: 18px; border-left: 1px solid var(--line); }
+section { padding: 12px 0; border-bottom: 1px solid var(--line); }
+section:first-child { padding-top: 14px; }
+.col > :last-child { border-bottom: 0; }
+h2 {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  margin: 0 0 8px; font-size: 13px; font-weight: 650;
+}
+h2 small { font-weight: 400; font-size: 11.5px; color: var(--muted); }
+
+/* Inputs */
+input[type=url], input[type=text], input[type=number] {
+  width: 100%; min-width: 0;
+  padding: 6px 8px;
+  font: inherit; color: inherit;
+  background: var(--field);
+  border: 1px solid transparent; border-radius: 7px;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+input[type=number] { font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input:hover { border-color: var(--line); }
+input:focus { border-color: var(--blue); background: var(--bg); box-shadow: 0 0 0 3px var(--blue-soft); }
+input::placeholder { color: var(--muted); opacity: .8; }
+
+.field { display: block; margin-bottom: 10px; }
+.name { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 550; color: var(--muted); }
+.info { margin: -4px 0 10px; min-height: 0; font-size: 11.5px; color: var(--muted); }
+.info:empty { display: none; }
+.info .warn { color: var(--amber); }
+.info .err { color: var(--bad); }
+
+/* Provider: segmented control */
+.segmented {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+  padding: 3px; background: var(--field); border-radius: 9px;
+}
+.segmented label { position: relative; cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented span {
+  display: block; padding: 6px 8px; border-radius: 7px; text-align: center;
+  font-weight: 550; color: var(--muted); transition: background .15s, color .15s;
+}
+.segmented small { display: block; font-size: 10.5px; font-weight: 400; opacity: .8; }
+.segmented input:checked + span { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(20,30,50,.12), 0 0 0 1px var(--line); }
+.segmented input:focus-visible + span { box-shadow: 0 0 0 2px var(--blue); }
+
+/* Toggle switches */
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; cursor: pointer; }
+.switch b { display: block; font-weight: 550; }
+.switch small { display: block; font-size: 11.5px; color: var(--muted); }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.switch i {
+  flex: none; position: relative; width: 32px; height: 18px; border-radius: 999px;
+  background: var(--line); transition: background .18s;
+}
+.switch i::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .18s;
+}
+.switch input:checked + i { background: var(--blue); }
+.switch input:checked + i::after { transform: translateX(14px); }
+.switch input:focus-visible + i { box-shadow: 0 0 0 3px var(--blue-soft), 0 0 0 1px var(--blue); }
+
+/* Number grids */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; margin-bottom: 6px; }
+.grid.three { grid-template-columns: repeat(3, 1fr); }
+.num { display: block; }
+.num > span:first-child { display: block; margin-bottom: 3px; font-size: 11.5px; color: var(--muted); }
+.unit { position: relative; display: block; }
+.unit input { padding-right: 22px; }
+.unit em { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11.5px; color: var(--muted); pointer-events: none; }
+
+details { padding: 12px 0; }
+summary { cursor: pointer; font-size: 12px; font-weight: 550; color: var(--muted); list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "▸"; display: inline-block; width: 12px; transition: transform .15s; }
+details[open] summary::before { transform: rotate(90deg); }
+details[open] summary { margin-bottom: 8px; }
+summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px 12px; border-top: 1px solid var(--line);
+  font-size: 11.5px; color: var(--muted);
+}
+.saved.flash { color: var(--ok); }
+.link { padding: 0; font: inherit; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.link:hover { color: var(--text); }
+.link:focus-visible, .status:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* No transitions until settings are filled in, so toggles don't animate on open */
+body:not(.ready) *, body:not(.ready) *::before, body:not(.ready) *::after { transition: none !important; }
+
+/* Server unreachable: everything except the server field is locked and dimmed */
+.lockable { transition: opacity .2s; }
+body.offline .lockable { opacity: .42; }
+body.offline .lockable :is(input, summary, .segmented label, .switch) { cursor: not-allowed; }
+input:disabled + span, input:disabled + i { pointer-events: none; }
+
+/* Field help: small "i" button + one shared tooltip bubble (positioned in popup.js) */
+.tip {
+  display: inline-grid; place-items: center;
+  width: 14px; height: 14px; margin-left: 5px; padding: 0;
+  font: italic 600 9.5px/1 Georgia, "Times New Roman", serif;
+  color: var(--muted); background: transparent;
+  border: 1px solid currentColor; border-radius: 50%;
+  vertical-align: 1px; cursor: help; opacity: .65;
+  transition: opacity .15s, color .15s;
+}
+.tip:hover, .tip:focus-visible, .tip[aria-expanded="true"] { opacity: 1; color: var(--blue); outline: none; }
+.tip:focus-visible { box-shadow: 0 0 0 3px var(--blue-soft); }
+#tooltip {
+  position: fixed; z-index: 10; max-width: 250px;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 12px; line-height: 1.45; color: #fff;
+  background: var(--ink);
+  box-shadow: 0 6px 20px rgba(15,23,42,.28), 0 0 0 1px rgba(255,255,255,.06);
+  pointer-events: none;
+  opacity: 0; transform: translateY(3px); transition: opacity .12s, transform .12s;
+}
+#tooltip.show { opacity: 1; transform: none; }
+#tooltip::after {   /* arrow; --ax set from JS */
+  content: ""; position: absolute; left: var(--ax, 50%); width: 8px; height: 8px; margin-left: -4px;
+  background: inherit; transform: rotate(45deg);
+}
+#tooltip[data-side="above"]::after { bottom: -4px; }
+#tooltip[data-side="below"]::after { top: -4px; }
+@media (prefers-color-scheme: dark) { #tooltip { background: #2A3854; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

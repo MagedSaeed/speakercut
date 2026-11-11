@@ -91,24 +91,31 @@
   const shadow = host.attachShadow({ mode: "open" });
   shadow.innerHTML = `
     <style>
-      :host{all:initial}
-      .box{font:13px system-ui,sans-serif;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+      :host{all:initial;display:block}
+      .box{font:13px system-ui,sans-serif;display:flex;gap:8px;align-items:center;justify-content:center}
+      .btns{display:flex;gap:8px;align-items:center}
       .box.floating{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);z-index:2147483646;
         background:#fff;border:1px solid #c9d3e0;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);padding:6px 8px;max-width:620px}
-      .box.inline{width:100%;margin:0 0 8px}
+      /* Inline (under the Video Tutorial / Guidelines links): buttons on one row, status centred below,
+         with hairlines above and below marking SpeakerCut's own area */
+      .box.inline{flex-direction:column;gap:5px;margin:4px 0 10px;padding:9px 0 8px;
+        border-top:1px solid #e3e7ef;border-bottom:1px solid #e3e7ef}
       button{font:inherit;border:1px solid #4A90E2;background:#4A90E2;color:#fff;border-radius:7px;padding:5px 12px;cursor:pointer;font-weight:600}
       .inline button{font-size:14px}
       button img{vertical-align:-3px;margin-right:6px;border-radius:4px}
       button.sec{background:#fafafa;color:#4A90E2;border-color:#ccc}
       button:disabled{opacity:.5;cursor:default}
       .st{color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px}
-      .err{color:#b00020}
+      .inline .st{max-width:100%;font-size:12px;color:#687389;text-align:center}
+      .err,.inline .err{color:#b00020}
       .x{border:none;background:none;color:#888;padding:0 4px;font-weight:400}
       .inline .x{display:none}
     </style>
     <div class="box floating" id="box">
-      <button id="run" title="Diarize this task and add draft speaker segments (does not submit)"><img id="logo" alt="" width="16" height="16">Presegment</button>
-      <button id="undo" class="sec" title="Remove segments added by this extension on this task">Remove auto</button>
+      <div class="btns">
+        <button id="run" title="Diarize this task and add draft speaker segments (does not submit)"><img id="logo" alt="" width="16" height="16">Presegment</button>
+        <button id="undo" class="sec" title="Remove segments added by this extension on this task">Remove auto</button>
+      </div>
       <span id="st" class="st">Ready</span>
       <button id="hide" class="x" title="Hide">✕</button>
     </div>`;
