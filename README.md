@@ -17,7 +17,8 @@ cd server
 cp .env.example .env     # then put your HF_TOKEN in .env
 ```
 
-`.env` is git-ignored; a real `HF_TOKEN` environment variable overrides it. **Test server** in the extension popup reports whether the token was found.
+`.env` is git-ignored; a real `HF_TOKEN` environment variable overrides it. The status in the extension popup warns if the token is missing.
+Write values without quotes and keep comments on their own lines (Docker's `--env-file` reads the rest of the line literally).
 
 ### Option A: Docker (easiest)
 
@@ -34,7 +35,11 @@ docker run -d --name speakercut-server --restart unless-stopped \
 - The server listens on `http://127.0.0.1:8000` (only reachable from this machine). Downloaded models are kept in the `speakercut-cache` volume, so restarts are fast.
 - NVIDIA GPU: install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and add `--gpus all` to `docker run`. Without it the server runs on CPU.
 - Logs: `docker logs -f speakercut-server`. Stop: `docker stop speakercut-server` (start again with `docker start speakercut-server`).
-- After changing `.env` or pulling new code: `docker rm -f speakercut-server`, then run the `docker build` and `docker run` commands again.
+- After changing `.env` or pulling new code, rebuild and restart in one line:
+  ```bash
+  docker build -t speakercut-server . && docker rm -f speakercut-server 2>/dev/null; docker run -d --name speakercut-server --restart unless-stopped --env-file .env -p 127.0.0.1:8000:8000 -v speakercut-cache:/root/.cache speakercut-server
+  ```
+- `speakercut-cache` is a Docker volume holding the downloaded pyannote and Demucs models; it survives `docker rm`, so models download only once. See its size with `docker system df -v`; delete it with `docker volume rm speakercut-cache` (models download again on the next run).
 
 ### Option B: uv
 
@@ -81,7 +86,7 @@ The extension isn't on the Chrome Web Store; you load it from this repository.
 3. Turn on **Developer mode** (top-right toggle).
 4. Click **Load unpacked** and select the `extension/` folder inside the repository (the one containing `manifest.json`).
 5. Pin it: click the puzzle-piece icon in the toolbar → pin **SpeakerCut**.
-6. Click the SpeakerCut icon. Leave **Server URL** as `http://127.0.0.1:8000` (or set your own), click **Save**, then **Test server**. It should say `OK`.
+6. Click the SpeakerCut icon. Leave **Server** as `http://127.0.0.1:8000` (or set your own). The status in the top-right corner should turn green and say **Online**; changes save automatically.
 
 Chrome may show a "developer mode extensions" notice on startup; that's expected for extensions loaded this way.
 
